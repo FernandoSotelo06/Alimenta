@@ -58,7 +58,7 @@ export default function AboutPage() {
               <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center">
                 <Leaf className="w-7 h-7 text-primary-foreground" />
               </div>
-              <span className="text-3xl font-bold text-foreground">NutresPerú</span>
+              <span className="text-3xl font-bold text-foreground"></span>
             </div>
             <h1 className="text-4xl font-bold text-foreground mb-6">
               Transformando vidas a través de la alimentación saludable

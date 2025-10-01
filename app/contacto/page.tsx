@@ -54,7 +54,7 @@ export default function ContactPage() {
     {
       icon: Mail,
       title: "Email",
-      details: ["info@nutresperu.com", "consultas@nutresperu.com"],
+      details: ["info@Alimenta.com", "consultas@Alimentaperu.com"],
     },
     {
       icon: Clock,

@@ -7,11 +7,11 @@ import { Navigation } from "@/components/navigation"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Alimenta - Recetas Saludables | NutresPerú",
+  title: "Alimenta - Recetas Saludables ",
   description:
-    "Descubre y comparte recetas saludables con cálculo nutricional automático. La plataforma de alimentación sana de NutresPerú.",
+    "Descubre y comparte recetas saludables con cálculo nutricional automático. La plataforma de alimentación sana de Alimenta.",
   generator: "v0.app",
-  keywords: "recetas saludables, nutrición, alimentación, Perú, NutresPerú, cocina saludable",
+  keywords: "recetas saludables, nutrición, alimentación, Perú, cocina saludable",
 }
 
 export default function RootLayout({

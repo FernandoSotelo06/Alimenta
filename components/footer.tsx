@@ -10,7 +10,7 @@ const footerLinks = {
     { name: "Ingredientes", href: "#ingredientes" },
   ],
   company: [
-    { name: "Sobre NutresPerú", href: "#nosotros" },
+    { name: "Sobre Nosotros", href: "#nosotros" },
     { name: "Nuestro Equipo", href: "#equipo" },
     { name: "Misión y Visión", href: "#mision" },
     { name: "Contacto", href: "#contacto" },
@@ -52,7 +52,7 @@ export function Footer() {
             </div>
 
             <p className="text-muted-foreground max-w-sm">
-              La plataforma de recetas saludables de NutresPerú. Transformamos la forma en que cocinas y compartes
+              La plataforma de recetas saludables de Alimenta. Transformamos la forma en que cocinas y compartes
               alimentación nutritiva.
             </p>
 
@@ -60,7 +60,7 @@ export function Footer() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Mail className="w-4 h-4" />
-                <span>contacto@nutresperu.com</span>
+                <span>contacto@Alimenta.com</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Phone className="w-4 h-4" />
@@ -160,7 +160,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="py-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-sm text-muted-foreground">© 2025 NutresPerú. Todos los derechos reservados.</p>
+          <p className="text-sm text-muted-foreground">© 2025 Alimenta. Todos los derechos reservados.</p>
 
           <div className="flex items-center gap-4 text-sm text-muted-foreground">
             <span>Hecho con</span>

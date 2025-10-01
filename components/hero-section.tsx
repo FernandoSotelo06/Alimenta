@@ -21,7 +21,7 @@ export function HeroSection() {
             <div className="space-y-4">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-medium">
                 <Leaf className="w-4 h-4" />
-                NutresPerú presenta
+                Alimenta
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-tight">
