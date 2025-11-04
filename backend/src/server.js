@@ -1,18 +1,32 @@
-//Carga de variables de entorno
-import dotenv from 'dotenv'
-dotenv.config()
-
-// App con los endpoints
 import app from "./app.js"
 
-// Base de datos
-const { sequelize } = await import("./db.js")
+import models, { sequelize } from './models/index.js'
 
-const PORT = process.env.PORT
+const findIngredients = async () => {
+    try {
+        const ingredientes = await models.Ingrediente.findAll()
+        console.log('Ingredientes encontrados:', ingredientes.length)
+        console.log(ingredientes)
+    } catch (error) {
+        console.error('Error al buscar ingredientes:', error)
+    }
+}
 
-sequelize.authenticate()
-  .then(() => console.log('Conectado a PostgreSQL'))
-  .catch(err => console.error('Error al conectar:', err))
+const PORT = process.env.PORT || 3000
 
-app.listen(PORT)
-console.log(`Servidor corriendo en el puerto ${PORT}`)
+const startServer = async () => {
+    try {
+        await sequelize.authenticate()
+          .then(() => {console.log('Conectado a PostgreSQL')})
+          .catch((err) => {'Error en la conexión a la DB: ', err})
+        
+        app.listen(PORT, () => {
+            console.log(`Servidor corriendo en el puerto ${PORT}`)
+        })
+    } catch (err) {
+        console.error('Error al conectar:', err)
+        process.exit(1)
+    }
+}
+
+startServer()
