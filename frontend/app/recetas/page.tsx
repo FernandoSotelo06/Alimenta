@@ -1,83 +1,159 @@
+// RecipesPage.jsx
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Search, Clock, Users, Heart, Plus, SlidersHorizontal } from "lucide-react"
-import { RecipeService, type Recipe } from "@/lib/recipes"
 import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
+const API_URL = "http://localhost:3001/api"
+
+interface ApiEtiqueta {
+  etiqueta_id: number
+  nombre: string
+}
+
+interface ApiReceta {
+  receta_id: number
+  titulo: string
+  descripcion: string
+  imagen_principal: string
+  tiempo_preparacion: number
+  porciones: number
+  dificultad: "fácil" | "intermedio" | "difícil"
+  calificacion_promedio: number
+  etiquetas: ApiEtiqueta[]
+  usuario: {
+    nombre: string
+    avatar: string
+  }
+  fecha_creacion: string
+}
+
+interface Recipe {
+  id: number
+  title: string
+  description: string
+  image: string
+  difficulty: string
+  category: string
+  author: {
+    name: string
+    avatar: string
+  }
+  createdAt: string
+  prepTime: number
+  cookTime: number
+  servings: number
+  likes: number
+  tags: string[]
+}
+
 export default function RecipesPage() {
+  const [recipes, setRecipes] = useState<ApiReceta[]>([])
+  const [categories, setCategories] = useState<ApiEtiqueta[]>([])
+  const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("Todas")
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [sortBy, setSortBy] = useState("recent")
   const { isAuthenticated } = useAuth()
 
-  const recipes = RecipeService.getAllRecipes()
-  const categories = ["Todas", ...RecipeService.getCategories()]
-
-  const filteredRecipes = useMemo(() => {
-    let filtered = recipes
-
-    if (searchQuery) {
-      filtered = RecipeService.searchRecipes(searchQuery)
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch(`${API_URL}/etiquetas`)
+        if (!res.ok) throw new Error('Error al cargar etiquetas')
+        const data = await res.json()
+        setCategories(data)
+      } catch (error) {
+        console.error("Error cargando categorías:", error)
+      }
     }
+    fetchCategories()
+  }, [])
 
-    if (selectedCategory !== "Todas") {
-      filtered = filtered.filter((recipe) => recipe.category === selectedCategory)
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      setIsLoading(true)
+      try {
+        const params = new URLSearchParams()
+        
+        if (searchQuery) params.append("titulo", searchQuery)
+        if (selectedCategory) params.append("etiquetaId", String(selectedCategory))
+        params.append("sortBy", sortBy)
+
+        const res = await fetch(`${API_URL}/recetas?${params.toString()}`)
+        if (!res.ok) throw new Error('Error al cargar recetas')
+        
+        const data = await res.json()
+        setRecipes(data)
+      } catch (error) {
+        console.error("Error cargando recetas:", error)
+        setRecipes([])
+      } finally {
+        setIsLoading(false)
+      }
     }
+    
+    const timerId = setTimeout(() => {
+      fetchRecipes()
+    }, 300)
 
-    switch (sortBy) {
-      case "popular":
-        filtered = filtered.sort((a, b) => b.likes - a.likes)
-        break
-      case "recent":
-        filtered = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        break
-      case "time":
-        filtered = filtered.sort((a, b) => a.prepTime + a.cookTime - (b.prepTime + b.cookTime))
-        break
-      default:
-        break
-    }
+    return () => clearTimeout(timerId)
+  }, [searchQuery, selectedCategory, sortBy])
 
-    return filtered
-  }, [searchQuery, selectedCategory, sortBy, recipes])
+  const handleCategoryClick = (etiquetaId: number | null) => {
+    setSelectedCategory(selectedCategory === etiquetaId ? null : etiquetaId)
+  }
+
+  const handleClearFilters = () => {
+    setSearchQuery("")
+    setSelectedCategory(null)
+    setSortBy("recent")
+  }
+
+  const formatRecipe = (recipe: ApiReceta): Recipe => ({
+    id: recipe.receta_id,
+    title: recipe.titulo,
+    description: recipe.descripcion,
+    image: recipe.imagen_principal || "/placeholder.svg",
+    difficulty: recipe.dificultad.charAt(0).toUpperCase() + recipe.dificultad.slice(1),
+    category: recipe.etiquetas[0]?.nombre || "General",
+    author: {
+      name: recipe.usuario?.nombre || "Anónimo",
+      avatar: recipe.usuario?.avatar || "/placeholder.svg"
+    },
+    createdAt: recipe.fecha_creacion,
+    prepTime: 0,
+    cookTime: recipe.tiempo_preparacion,
+    servings: recipe.porciones,
+    likes: Math.round(recipe.calificacion_promedio * 10),
+    tags: recipe.etiquetas.map(e => e.nombre)
+  })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       <div className="pt-20 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-foreground mb-4">Recetas Saludables</h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Descubre deliciosas recetas nutritivas creadas por nuestra comunidad de amantes de la cocina saludable
+              Descubre deliciosas recetas nutritivas creadas por nuestra comunidad
             </p>
-            <div className="flex items-center justify-center gap-6 mt-6 text-sm text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                <span>{recipes.length} recetas disponibles</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>Comunidad activa</span>
-              </div>
-            </div>
           </div>
 
-          {/* Search and Filters */}
           <div className="mb-8 space-y-4">
             <div className="flex flex-col lg:flex-row gap-4 items-center">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                 <Input
-                  placeholder="Buscar recetas, ingredientes..."
+                  placeholder="Buscar recetas por título..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -100,7 +176,7 @@ export default function RecipesPage() {
 
               {isAuthenticated && (
                 <Button asChild>
-                  <Link href="/crear-receta">
+                  <Link href="/recetas/nueva">
                     <Plus className="w-4 h-4 mr-2" />
                     Nueva Receta
                   </Link>
@@ -108,76 +184,51 @@ export default function RecipesPage() {
               )}
             </div>
 
-            {/* Category Filter */}
             <div className="flex flex-wrap gap-2">
+              <Button
+                variant={selectedCategory === null ? "default" : "outline"}
+                size="sm"
+                onClick={() => handleCategoryClick(null)}
+              >
+                Todas
+              </Button>
               {categories.map((category) => (
                 <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
+                  key={category.etiqueta_id}
+                  variant={selectedCategory === category.etiqueta_id ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                  className="transition-all duration-200"
+                  onClick={() => handleCategoryClick(category.etiqueta_id)}
                 >
-                  {category}
+                  {category.nombre}
                 </Button>
               ))}
             </div>
-          </div>
 
-          {/* Results Count and Active Filters */}
-          <div className="mb-6 flex items-center justify-between">
-            <p className="text-muted-foreground">
-              {filteredRecipes.length} receta{filteredRecipes.length !== 1 ? "s" : ""} encontrada
-              {filteredRecipes.length !== 1 ? "s" : ""}
-              {searchQuery && (
-                <span className="ml-1">
-                  para "<span className="font-medium text-foreground">{searchQuery}</span>"
-                </span>
-              )}
-            </p>
-            {(searchQuery || selectedCategory !== "Todas") && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSearchQuery("")
-                  setSelectedCategory("Todas")
-                }}
-              >
-                Limpiar filtros
-              </Button>
+            {(searchQuery || selectedCategory) && (
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  {recipes.length} receta{recipes.length !== 1 ? 's' : ''} encontrada{recipes.length !== 1 ? 's' : ''}
+                </p>
+                <Button variant="ghost" size="sm" onClick={handleClearFilters}>
+                  Limpiar filtros
+                </Button>
+              </div>
             )}
           </div>
 
-          {/* Recipe Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredRecipes.map((recipe) => (
-              <RecipeCard key={recipe.id} recipe={recipe} />
-            ))}
+            {isLoading ? (
+              <p className="col-span-3 text-center text-muted-foreground">Cargando recetas...</p>
+            ) : recipes.length > 0 ? (
+              recipes.map((recipe) => (
+                <RecipeCard key={recipe.receta_id} recipe={formatRecipe(recipe)} />
+              ))
+            ) : (
+              <div className="text-center py-12 col-span-3">
+                <p>No se encontraron recetas con esos filtros.</p>
+              </div>
+            )}
           </div>
-
-          {filteredRecipes.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="w-12 h-12 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">No se encontraron recetas</h3>
-              <p className="text-muted-foreground mb-4">No hay recetas que coincidan con tu búsqueda actual.</p>
-              <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                <Button variant="outline" onClick={() => setSearchQuery("")}>
-                  Limpiar búsqueda
-                </Button>
-                {isAuthenticated && (
-                  <Button asChild>
-                    <Link href="/crear-receta">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Crear primera receta
-                    </Link>
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -210,6 +261,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
           </Badge>
         </div>
       </div>
+      
       <CardHeader className="pb-3">
         <div className="flex items-center gap-2 mb-2">
           <Avatar className="w-6 h-6">
@@ -229,6 +281,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
         </CardTitle>
         <CardDescription className="line-clamp-2">{recipe.description}</CardDescription>
       </CardHeader>
+      
       <CardContent className="pt-0">
         <div className="flex items-center justify-between text-sm text-muted-foreground mb-3">
           <div className="flex items-center gap-1">
@@ -244,6 +297,7 @@ function RecipeCard({ recipe }: { recipe: Recipe }) {
             <span>{recipe.likes}</span>
           </div>
         </div>
+        
         <div className="flex flex-wrap gap-1">
           {recipe.tags.slice(0, 3).map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs">
