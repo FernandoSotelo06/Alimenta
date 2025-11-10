@@ -4,6 +4,7 @@ import cors from 'cors';
 
 //RUTAS
 import categoriesRoutes from './routes/categories.routes.js'
+import ingredientsRoutes from './routes/ingredients.routes.js'
 
 const app = express()
 
@@ -23,5 +24,6 @@ app.use((req, res, next) => {
 });
 
 app.use('/api', categoriesRoutes)
+app.use('/api', ingredientsRoutes)
 
 export default app
