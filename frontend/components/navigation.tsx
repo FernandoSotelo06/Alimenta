@@ -52,56 +52,45 @@ export function Navigation() {
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
                 </Link>
               ))}
+              {isAuthenticated && user && (
+                <Link
+                  href="/crear-receta"
+                  className="text-muted-foreground hover:text-foreground transition-colors duration-200 font-medium relative group flex items-center gap-1"
+                >
+                  <ChefHat className="w-4 h-4" />
+                  Crear Receta
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
+                </Link>
+              )}
             </div>
           </div>
 
           <div className="hidden md:flex items-center gap-4">
             {isAuthenticated && user ? (
               <>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href="/crear-receta">
-                    <ChefHat className="w-4 h-4 mr-2" />
-                    Crear Receta
-                  </Link>
-                </Button>
+                <Link href="/dashboard">
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
+                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 bg-primary text-[10px] flex items-center justify-center border-2 border-background">
+                      3
+                    </Badge>
+                  </Button>
+                </Link>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                        <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <Badge className="absolute -top-1 -right-1 w-3 h-3 p-0 bg-red-500 text-xs">3</Badge>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
-                    <div className="flex items-center justify-start gap-2 p-2">
-                      <div className="flex flex-col space-y-1 leading-none">
-                        <p className="font-medium">{user.name}</p>
-                        <p className="w-[200px] truncate text-sm text-muted-foreground">{user.email}</p>
-                      </div>
-                    </div>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href="/dashboard">
-                        <BookOpen className="mr-2 h-4 w-4" />
-                        <span>Dashboard</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href="/perfil">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Perfil</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Cerrar Sesión</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    console.log("Logout button clicked!");
+                    logout();
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Cerrar Sesión
+                </Button>
               </>
             ) : (
               <>
@@ -155,7 +144,14 @@ export function Navigation() {
                     <Button variant="ghost" size="sm" asChild>
                       <Link href="/perfil">Perfil</Link>
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={logout}>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => {
+                        console.log("Mobile logout clicked");
+                        logout();
+                      }}
+                    >
                       Cerrar Sesión
                     </Button>
                   </>

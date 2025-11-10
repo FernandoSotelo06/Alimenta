@@ -107,15 +107,6 @@ export default function LoginPage() {
                   </Button>
                 </div>
               </div>
-
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <p className="text-sm font-medium mb-2">Usuarios de prueba:</p>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>• maria@example.com - password123</p>
-                  <p>• carlos@example.com - password123</p>
-                  <p>• ana@example.com - password123</p>
-                </div>
-              </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={loading}>
