@@ -27,5 +27,19 @@ const models = {
 
 setupAssociations(models);
 
+// Exportar modelos individualmente
+export const { 
+  Categoria, 
+  Usuario, 
+  Ingrediente, 
+  Etiqueta, 
+  Receta, 
+  RecetaIngrediente, 
+  RecetaEtiqueta, 
+  Comentario, 
+  Favorito, 
+  Like 
+} = models;
+
 export { sequelize };
 export default models;

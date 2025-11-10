@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -10,19 +10,41 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Plus, Heart, Eye, Users, TrendingUp, Calendar, ChefHat, BookOpen, Settings, Award } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
+import { UsuarioService, type EstadisticasUsuario } from "@/lib/usuario"
 
 export default function DashboardPage() {
   const { user, isAuthenticated, loading } = useAuth()
   const router = useRouter()
+  const [estadisticas, setEstadisticas] = useState<EstadisticasUsuario | null>(null)
+  const [loadingEstadisticas, setLoadingEstadisticas] = useState(true)
 
   useEffect(() => {
-    console.log("[v0] Dashboard - Auth state:", { isAuthenticated, loading, user: user?.name })
+    console.log("[Dashboard] Auth state:", { isAuthenticated, loading, user: user?.name })
 
     if (!loading && !isAuthenticated) {
-      console.log("[v0] Not authenticated, redirecting to login")
+      console.log("[Dashboard] Not authenticated, redirecting to login")
       router.push("/login")
     }
   }, [isAuthenticated, loading, router])
+
+  // Cargar estadísticas del usuario
+  useEffect(() => {
+    const cargarEstadisticas = async () => {
+      if (isAuthenticated && user) {
+        setLoadingEstadisticas(true)
+        const result = await UsuarioService.getMisEstadisticas()
+        if (result.success && result.data) {
+          setEstadisticas(result.data)
+          console.log("[Dashboard] Estadísticas cargadas:", result.data)
+        } else {
+          console.error("[Dashboard] Error al cargar estadísticas:", result.error)
+        }
+        setLoadingEstadisticas(false)
+      }
+    }
+
+    cargarEstadisticas()
+  }, [isAuthenticated, user])
 
   if (loading) {
     return (
@@ -46,10 +68,10 @@ export default function DashboardPage() {
   }
 
   const stats = {
-    recipes: 12,
-    likes: 248,
-    views: 1420,
-    followers: 156,
+    recipes: estadisticas?.recetas || 0,
+    likes: estadisticas?.meGusta || 0,
+    views: 1420, // TODO: Agregar endpoint para vistas
+    followers: 156, // TODO: Agregar endpoint para seguidores
   }
 
   const recentRecipes = [
