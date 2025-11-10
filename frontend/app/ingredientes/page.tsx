@@ -1,5 +1,5 @@
 // IngredientsPage.jsx
-// (CÓDIGO COMPLETO, LIMPIO Y SIN SECCIÓN "DESTACADOS")
+// (CÓDIGO COMPLETO - Con barras de nutrición añadidas)
 
 "use client"
 
@@ -7,7 +7,6 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-// Importamos 'LucideIcon' para definir el tipo
 import { Leaf, Heart, Zap, Shield, Apple, Fish, Wheat, Milk, Star, type LucideIcon } from "lucide-react"
 
 // --- Conexión a la API ---
@@ -22,12 +21,17 @@ interface ApiIngrediente {
   proteinas: number;
   carbohidratos: number;
   grasas: number;
+  
+  // --- CAMBIO 1: Interfaz actualizada ---
+  fibra: number;
+  azucares: number;
+  sodio: number;
+  // -------------------------------------
 }
 
 interface ApiCategoria {
   categoria_id: number;
   nombre: string;
-  // Los ingredientes ya vienen ordenados desde el backend
   ingredientes: ApiIngrediente[]; 
 }
 
@@ -37,7 +41,6 @@ const categoryIcons: { [key: string]: LucideIcon } = {
   "Granos y Cereales": Wheat,
   "Proteínas": Fish,
   "Lácteos y Alternativas": Milk,
-  // (Añade más mapeos si tus categorías de BD tienen otros nombres)
 };
 
 const categoryColors: { [key: string]: { color: string, bgColor: string } } = {
@@ -50,11 +53,9 @@ const categoryColors: { [key: string]: { color: string, bgColor: string } } = {
 
 export default function IngredientsPage() {
   
-  // --- Estados para los datos de la API ---
   const [ingredientCategories, setIngredientCategories] = useState<ApiCategoria[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // --- Tus Tips (los dejamos estáticos) ---
   const nutritionTips = [
     { icon: Heart, title: "Salud Cardiovascular", tip: "Incluye grasas saludables como aguacate, nueces y pescado graso." },
     { icon: Zap, title: "Energía Sostenible", tip: "Combina carbohidratos complejos con proteínas para energía estable." },
@@ -67,13 +68,10 @@ export default function IngredientsPage() {
     const fetchGroupedData = async () => {
       setIsLoading(true);
       try {
-        // 1. Carga los ingredientes agrupados por categoría
-        // (El backend ya los manda ordenados por popularidad)
         const res = await fetch(`${API_URL}/ingredientes/agrupados-por-categoria`);
         if (!res.ok) throw new Error('Error al cargar categorías');
         const data = await res.json();
         setIngredientCategories(data);
-
       } catch (error) {
         console.error("Error cargando datos de ingredientes:", error);
       } finally {
@@ -82,7 +80,7 @@ export default function IngredientsPage() {
     };
     
     fetchGroupedData();
-  }, []); // El array vacío [] significa "ejecutar solo 1 vez"
+  }, []); 
 
 
   return (
@@ -115,14 +113,12 @@ export default function IngredientsPage() {
           </div>
 
           {/* Ingredient Categories (Conectado a la API) */}
-          {/* Esta es la sección principal que querías */}
           <div className="space-y-12">
             {isLoading ? (
               <p className="text-center">Cargando categorías de ingredientes...</p>
             ) : (
               ingredientCategories.map((category) => {
                 
-                // Asignamos icono y color
                 const Icon = categoryIcons[category.nombre] || Leaf; 
                 const colors = categoryColors[category.nombre] || { color: 'text-gray-600', bgColor: 'bg-gray-100' };
 
@@ -136,7 +132,6 @@ export default function IngredientsPage() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {/* Los ingredientes aquí ya vienen ordenados por popularidad desde el backend */}
                       {category.ingredientes.map((ingredient) => (
                         <Card key={ingredient.ingrediente_id} className="overflow-hidden">
                           <CardHeader className="pb-3">
@@ -153,15 +148,8 @@ export default function IngredientsPage() {
                             </div>
                           </CardHeader>
                           <CardContent className="space-y-4">
-                            {/* Benefits (Simulado) */}
-                            <div>
-                              <h4 className="font-medium text-sm mb-2">Beneficios:</h4>
-                              <div className="flex flex-wrap gap-1">
-                                <Badge variant="outline" className="text-xs">
-                                  Nutritivo
-                                </Badge>
-                              </div>
-                            </div>
+                            
+                            {/* --- CAMBIO 2: Sección 'Beneficios' eliminada --- */}
 
                             {/* Nutrition (Traducido de la API) */}
                             <div>
@@ -184,6 +172,29 @@ export default function IngredientsPage() {
                                   <span className="text-xs font-medium">{ingredient.grasas || 0}g</span>
                                 </div>
                                 <Progress value={((ingredient.grasas || 0) / 20) * 100} className="h-1" />
+
+                                {/* --- CAMBIO 3: Nuevas barras añadidas --- */}
+                                
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-muted-foreground">Fibra</span>
+                                  <span className="text-xs font-medium">{ingredient.fibra || 0}g</span>
+                                </div>
+                                <Progress value={((ingredient.fibra || 0) / 25) * 100} className="h-1" />
+
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-muted-foreground">Azúcares</span>
+                                  <span className="text-xs font-medium">{ingredient.azucares || 0}g</span>
+                                </div>
+                                <Progress value={((ingredient.azucares || 0) / 30) * 100} className="h-1" />
+                                
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs text-muted-foreground">Sodio</span>
+                                  <span className="text-xs font-medium">{ingredient.sodio || 0}g</span>
+                                </div>
+                                <Progress value={((ingredient.sodio || 0) / 2.3) * 100} className="h-1" />
+                                
+                                {/* --------------------------------------- */}
+
                               </div>
                             </div>
                           </CardContent>
@@ -209,14 +220,14 @@ export default function IngredientsPage() {
                   🥗 500+ Recetas Saludables
                 </Badge>
                 <Badge variant="secondary" className="text-sm px-4 py-2">
-                 📊 Cálculo Nutricional Automático
+                  📊 Cálculo Nutricional Automático
                 </Badge>
                 <Badge variant="secondary" className="text-sm px-4 py-2">
                   👥 Comunidad Activa
                 </Badge>
               </div>
             </CardContent>
-       </Card>
+          </Card>
         </div>
       </div>
     </div>
