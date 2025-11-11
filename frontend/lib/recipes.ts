@@ -14,7 +14,7 @@ export interface Recipe {
   prepTime: number
   cookTime: number
   servings: number
-  difficulty: "Fácil" | "Intermedio" | "Difícil"
+  difficulty: "Fácil" | "Intermedio" | "Avanzado"
   category: string
   tags: string[]
   nutrition: {
