@@ -31,11 +31,11 @@ export function RecipeCard({
   const getDifficultyColor = (level: string) => {
     switch (level) {
       case "Fácil":
-        return "bg-primary/10 text-primary"
+        return "bg-green-100 text-green-700 border border-green-200"
       case "Intermedio":
-        return "bg-accent/10 text-accent"
+        return "bg-amber-100 text-amber-700 border border-amber-200"
       case "Avanzado":
-        return "bg-destructive/10 text-destructive"
+        return "bg-red-100 text-red-700 border border-red-200"
       default:
         return "bg-muted text-muted-foreground"
     }
@@ -62,9 +62,8 @@ export function RecipeCard({
           <Heart className={`w-4 h-4 ${isLiked ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
         </button>
 
-        {/* Difficulty badge */}
         <div className="absolute top-3 left-3">
-          <Badge className={getDifficultyColor(difficulty)}>{difficulty}</Badge>
+          <Badge className={`${getDifficultyColor(difficulty)} font-semibold text-xs px-2 py-1`}>{difficulty}</Badge>
         </div>
       </div>
 

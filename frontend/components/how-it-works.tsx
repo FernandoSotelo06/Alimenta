@@ -65,13 +65,15 @@ export function HowItWorks() {
               )}
 
               <div
-                className={`grid lg:grid-cols-2 gap-8 items-center ${index % 2 === 1 ? "lg:grid-flow-col-dense" : ""}`}
+                className={`flex flex-col lg:grid lg:grid-cols-2 gap-8 items-center ${
+                  index % 2 === 1 ? "lg:grid-flow-col-dense" : ""
+                }`}
               >
                 {/* Content */}
                 <div className={`space-y-6 ${index % 2 === 1 ? "lg:col-start-2" : ""}`}>
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
                         step.color === "primary" ? "bg-primary/10" : "bg-accent/10"
                       }`}
                     >
@@ -81,8 +83,8 @@ export function HowItWorks() {
                   </div>
 
                   <div className="space-y-4">
-                    <h3 className="text-2xl font-bold text-foreground">{step.title}</h3>
-                    <p className="text-muted-foreground text-lg leading-relaxed">{step.description}</p>
+                    <h3 className="text-xl sm:text-2xl font-bold text-foreground">{step.title}</h3>
+                    <p className="text-muted-foreground text-base sm:text-lg leading-relaxed">{step.description}</p>
                   </div>
 
                   {/* Features list */}
@@ -90,25 +92,25 @@ export function HowItWorks() {
                     {step.features.map((feature) => (
                       <div key={feature} className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-primary flex-shrink-0" />
-                        <span className="text-muted-foreground">{feature}</span>
+                        <span className="text-muted-foreground text-sm">{feature}</span>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 {/* Visual */}
-                <div className={`${index % 2 === 1 ? "lg:col-start-1" : ""}`}>
+                <div className={`w-full ${index % 2 === 1 ? "lg:col-start-1" : ""}`}>
                   <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
                     <CardContent className="p-0">
                       <div
-                        className={`h-64 flex items-center justify-center ${
+                        className={`h-48 sm:h-64 flex items-center justify-center ${
                           step.color === "primary"
                             ? "bg-gradient-to-br from-primary/10 to-primary/5"
                             : "bg-gradient-to-br from-accent/10 to-accent/5"
                         }`}
                       >
                         <step.icon
-                          className={`w-20 h-20 ${
+                          className={`w-16 sm:w-20 h-16 sm:h-20 ${
                             step.color === "primary" ? "text-primary" : "text-accent"
                           } opacity-80`}
                         />
@@ -122,13 +124,13 @@ export function HowItWorks() {
         </div>
 
         {/* Benefits Section */}
-        <div className="bg-muted/50 rounded-2xl p-8 lg:p-12">
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
+        <div className="bg-muted/50 rounded-2xl p-6 sm:p-8 lg:p-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className="space-y-6">
-              <h3 className="text-2xl font-bold text-foreground">
+              <h3 className="text-2xl sm:text-3xl font-bold text-foreground">
                 ¿Por qué elegir <span className="text-primary">Alimenta</span>?
               </h3>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm sm:text-base">
                 Más que una plataforma de recetas, somos una comunidad comprometida con promover hábitos alimenticios
                 saludables y sostenibles.
               </p>
@@ -137,13 +139,13 @@ export function HowItWorks() {
                 {benefits.map((benefit) => (
                   <div key={benefit} className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <span className="text-foreground">{benefit}</span>
+                    <span className="text-foreground text-sm">{benefit}</span>
                   </div>
                 ))}
               </div>
 
-              <Link href="/registro">
-                <Button size="lg" className="bg-primary hover:bg-primary/90">
+              <Link href="/registro" className="inline-block">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
                   Comenzar Ahora
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -151,40 +153,40 @@ export function HowItWorks() {
             </div>
 
             <div className="relative">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="space-y-3 sm:space-y-4">
                   <Card className="p-4 bg-card">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-3 h-3 bg-primary rounded-full"></div>
-                      <span className="text-sm font-medium">Proteínas</span>
+                      <span className="text-xs sm:text-sm font-medium">Proteínas</span>
                     </div>
-                    <div className="text-2xl font-bold text-primary">25g</div>
+                    <div className="text-xl sm:text-2xl font-bold text-primary">25g</div>
                   </Card>
 
                   <Card className="p-4 bg-card">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-3 h-3 bg-accent rounded-full"></div>
-                      <span className="text-sm font-medium">Fibra</span>
+                      <span className="text-xs sm:text-sm font-medium">Fibra</span>
                     </div>
-                    <div className="text-2xl font-bold text-accent">8g</div>
+                    <div className="text-xl sm:text-2xl font-bold text-accent">8g</div>
                   </Card>
                 </div>
 
-                <div className="space-y-4 mt-8">
+                <div className="space-y-3 sm:space-y-4 mt-4 sm:mt-8">
                   <Card className="p-4 bg-card">
                     <div className="flex items-center gap-2 mb-2">
                       <Users className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-medium">Usuarios</span>
+                      <span className="text-xs sm:text-sm font-medium">Usuarios</span>
                     </div>
-                    <div className="text-2xl font-bold text-foreground">1,200+</div>
+                    <div className="text-xl sm:text-2xl font-bold text-foreground">1.2k</div>
                   </Card>
 
                   <Card className="p-4 bg-card">
                     <div className="flex items-center gap-2 mb-2">
                       <div className="w-3 h-3 bg-primary rounded-full"></div>
-                      <span className="text-sm font-medium">Calorías</span>
+                      <span className="text-xs sm:text-sm font-medium">Calorías</span>
                     </div>
-                    <div className="text-2xl font-bold text-primary">320</div>
+                    <div className="text-xl sm:text-2xl font-bold text-primary">320</div>
                   </Card>
                 </div>
               </div>

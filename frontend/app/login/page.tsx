@@ -31,10 +31,7 @@ export default function LoginPage() {
       const result = await login(email, password)
       if (result.success) {
         console.log("[v0] Login successful, redirecting to dashboard")
-        setTimeout(() => {
-          router.push("/dashboard")
-          router.refresh()
-        }, 100)
+        router.push("/dashboard")
       } else {
         setError(result.error || "Error al iniciar sesión")
       }
