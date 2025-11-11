@@ -10,7 +10,7 @@ import usuarioRoutes from './routes/usuarioRoutes.js';
 import ingredienteRoutes from './routes/ingredienteRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import etiquetaRoutes from './routes/etiquetaRoutes.js';
-import recetaRoutes from './routes/recetaRoutes.js';
+import recetaRoutes from './routes/receta.routes.js';
 
 const app = express();
 

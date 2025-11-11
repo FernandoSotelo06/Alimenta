@@ -1,13 +1,14 @@
-// src/routes/recetaRoutes.js
-// (ACTUALIZADO para 'sortBy')
+import { Router } from "express";
+import models from "../models/index.js";
+import { Op } from "sequelize";
+import { createRecipe, findRecipeById } from "../controllers/recipesControllers.js";
+import multer from "multer";
 
-import { Router } from 'express';
-import models from '../models/index.js';
-import { Op } from 'sequelize';
+const upload = multer({ storage: multer.memoryStorage() });
 
 const router = Router();
 
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     // 1. Obtenemos TODOS los filtros de la URL
     const { titulo, etiquetaId, sortBy } = req.query;
@@ -20,16 +21,16 @@ router.get('/', async (req, res) => {
     // 2. Definimos el orden (¡NUEVO!)
     let orderClause;
     switch (sortBy) {
-      case 'popular':
+      case "popular":
         // Usamos 'calificacion_promedio' para "popular"
-        orderClause = [['calificacion_promedio', 'DESC']];
+        orderClause = [["calificacion_promedio", "DESC"]];
         break;
-      case 'time':
-        orderClause = [['tiempo_preparacion', 'ASC']];
+      case "time":
+        orderClause = [["tiempo_preparacion", "ASC"]];
         break;
-      case 'recent':
+      case "recent":
       default:
-        orderClause = [['fecha_creacion', 'DESC']];
+        orderClause = [["fecha_creacion", "DESC"]];
         break;
     }
 
@@ -37,15 +38,15 @@ router.get('/', async (req, res) => {
     const includeClause = [
       {
         model: models.Usuario,
-        as: 'usuario',
-        attributes: ['nombre', 'avatar'],
+        as: "usuario",
+        attributes: ["nombre", "avatar"],
       },
       {
         model: models.Etiqueta,
-        as: 'etiquetas',
-        attributes: ['etiqueta_id', 'nombre', 'color'],
+        as: "etiquetas",
+        attributes: ["etiqueta_id", "nombre", "color"],
         required: false,
-        through: { attributes: [] } 
+        through: { attributes: [] },
       },
     ];
 
@@ -64,9 +65,11 @@ router.get('/', async (req, res) => {
 
     res.json(recetas);
   } catch (error) {
-    console.error('Error al obtener recetas:', error);
-    res.status(500).json({ error: 'Error interno del servidor' });
+    console.error("Error al obtener recetas:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
+router.post("/", upload.single("image"), createRecipe);
+router.get("/:id", findRecipeById)
 
 export default router;

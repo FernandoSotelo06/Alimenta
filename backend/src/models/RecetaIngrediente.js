@@ -36,6 +36,7 @@ export default (sequelize) => {
       },
       notas: {
         type: DataTypes.TEXT,
+        allowNull: true
       },
     },
     {

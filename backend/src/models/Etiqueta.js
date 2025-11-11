@@ -17,9 +17,11 @@ export default (sequelize) => {
       color: {
         type: DataTypes.STRING(7),
         defaultValue: "#6B7280",
+        allowNull: true
       },
       descripcion: {
         type: DataTypes.TEXT,
+        allowNull: true
       },
       activa: {
         type: DataTypes.BOOLEAN,

@@ -12,7 +12,8 @@ import Link from "next/link"
 import { useAuth } from "@/hooks/use-auth"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
-const API_URL = "http://localhost:3001/api"
+
+const API_URL = "http://localhost:4000/api"
 
 interface ApiEtiqueta {
   etiqueta_id: number

@@ -2,7 +2,7 @@
 const API_URL = 'http://localhost:4000/api/auth';
 
 export interface User {
-  id: string
+  id: number
   name: string
   email: string
   avatar?: string
