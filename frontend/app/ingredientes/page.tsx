@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress"
 import { Leaf, Heart, Zap, Shield, Apple, Fish, Wheat, Milk, Star, type LucideIcon } from "lucide-react"
 
 // --- Conexión a la API ---
-const API_URL = "http://localhost:3001/api";
+const API_URL = "http://localhost:4000/api";
 
 // --- Tipos de datos de la API ---
 interface ApiIngrediente {
