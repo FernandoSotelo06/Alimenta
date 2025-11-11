@@ -1,7 +1,49 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Leaf, Heart, Zap, Shield, Apple, Fish, Wheat, Milk } from "lucide-react"
+import { Leaf, Heart, Zap, Shield, Apple, Fish, Wheat, Milk, Star, type LucideIcon } from "lucide-react"
+
+// --- Conexión a la API ---
+const API_URL = "http://localhost:4000/api";
+
+// --- Tipos de datos de la API ---
+interface ApiIngrediente {
+  ingrediente_id: number;
+  nombre: string;
+  imagen: string;
+  calorias: number;
+  proteinas: number;
+  carbohidratos: number;
+  grasas: number;
+  
+  // --- CAMBIO 1: Interfaz actualizada ---
+  fibra: number;
+  azucares: number;
+  sodio: number;
+  // -------------------------------------
+}
+
+interface ApiCategoria {
+  categoria_id: number;
+  nombre: string;
+  ingredientes: ApiIngrediente[]; 
+}
+
+// --- Mapeo de Iconos (CON TIPOS CORRECTOS) ---
+const categoryIcons: { [key: string]: LucideIcon } = {
+  "Frutas y Verduras": Apple,
+  "Granos y Cereales": Wheat,
+  "Proteínas": Fish,
+  "Lácteos y Alternativas": Milk,
+};
+
+const categoryColors: { [key: string]: { color: string, bgColor: string } } = {
+  "Frutas y Verduras": { color: "text-green-600", bgColor: "bg-green-100" },
+  "Granos y Cereales": { color: "text-amber-600", bgColor: "bg-amber-100" },
+  "Proteínas": { color: "text-blue-600", bgColor: "bg-blue-100" },
+  "Lácteos y Alternativas": { color: "text-purple-600", bgColor: "bg-purple-100" },
+};
+
 
 export default function IngredientsPage() {
   const ingredientCategories = [
