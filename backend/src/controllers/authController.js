@@ -70,10 +70,12 @@ export const register = async (req, res) => {
     const token = generateToken(nuevoUsuario.usuario_id);
 
     // Enviar token como cookie HTTP-only
+    // use SameSite='none' + secure=true en producción (necesario para cookies cross-site sobre HTTPS)
+    // mantener SameSite='lax' en desarrollo para evitar requerir HTTPS localmente
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
     });
 
@@ -140,7 +142,7 @@ export const login = async (req, res) => {
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
     });
 
@@ -179,11 +181,11 @@ export const getMe = async (req, res) => {
 // POST /api/auth/logout - Cerrar sesión (opcional)
 export const logout = async (req, res) => {
   try {
-    // Eliminar la cookie
+    // Eliminar la cookie (mismas opciones que al crearla)
     res.clearCookie('token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
     });
     
     res.status(200).json({
