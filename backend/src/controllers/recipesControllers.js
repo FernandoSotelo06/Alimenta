@@ -161,6 +161,11 @@ export const findRecipeById = async (req, res) => {
           where: { activa: true },
           required: false,
         },
+        {
+          model: models.Like,
+          as: "likes",
+          attributes: ["usuario_id"]
+        }
       ],
     });
     

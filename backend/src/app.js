@@ -11,6 +11,7 @@ import ingredienteRoutes from './routes/ingredienteRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import etiquetaRoutes from './routes/etiquetaRoutes.js';
 import recetaRoutes from './routes/receta.routes.js';
+import likeRoutes from './routes/likes.routes.js'
 
 const app = express();
 
@@ -39,5 +40,6 @@ app.use('/api/ingredientes', ingredienteRoutes);
 app.use('/api/categorias', categoriaRoutes);
 app.use('/api/etiquetas', etiquetaRoutes);
 app.use('/api/recetas', recetaRoutes);
+app.use('/api/likes', likeRoutes);
 
 export default app;

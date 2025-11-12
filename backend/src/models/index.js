@@ -38,7 +38,7 @@ export const {
   RecetaEtiqueta, 
   Comentario, 
   Favorito, 
-  Like 
+  Like,
 } = models;
 
 export { sequelize };

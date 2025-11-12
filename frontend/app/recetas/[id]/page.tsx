@@ -29,20 +29,23 @@ import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { getRecipeById } from "@/api/recipes.api";
 import Recipe from "@/typings/recipe";
+import { setLike } from "@/api/likes.api";
 
 export default function RecipeDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user: currentUser } = useAuth();
   const { toast } = useToast();
 
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  // const [isSaved, setIsSaved] = useState(false);
   const [checkedIngredients, setCheckedIngredients] = useState<boolean[]>([]);
   const [checkedInstructions, setCheckedInstructions] = useState<boolean[]>([]);
 
   useEffect(() => {
+    if (!currentUser) return;
+
     const loadRecipe = async () => {
       try {
         const data = await getRecipeById(Number(params.id));
@@ -54,6 +57,15 @@ export default function RecipeDetailPage() {
           setCheckedInstructions(
             new Array(data.instrucciones.length).fill(false)
           );
+
+          if (isAuthenticated && currentUser) {
+            const liked = data.likes?.some(
+              (like: any) => like.usuario_id === Number(currentUser.id)
+            );
+            console.log(liked)
+            setIsLiked(liked);
+            console.log('isLiked', isLiked)
+          }
         }
       } catch (error) {
         console.error("Error al obtener la receta:", error);
@@ -61,45 +73,47 @@ export default function RecipeDetailPage() {
     };
 
     loadRecipe();
-  }, [params.id]);
+  }, [params.id, isAuthenticated, currentUser]);
 
-  const handleLike = () => {
+  const handleLike = async () => {
     if (!isAuthenticated) {
-      toast({
-        title: "Inicia sesión",
-        description: "Necesitas iniciar sesión para dar me gusta a las recetas",
-        variant: "destructive",
-      });
       return;
     }
 
-    setIsLiked(!isLiked);
-    toast({
-      title: isLiked ? "Removido de favoritos" : "Agregado a favoritos",
-      description: isLiked
-        ? "La receta fue removida de tus favoritos"
-        : "La receta fue agregada a tus favoritos",
-    });
-  };
+    try {
+      if (!currentUser || !recipe) return;
 
-  const handleSave = () => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Inicia sesión",
-        description: "Necesitas iniciar sesión para guardar recetas",
-        variant: "destructive",
-      });
-      return;
+      const data = {
+        userId: currentUser.id,
+        recipeId: Number(params.id),
+      };
+      console.log("DATA", data);
+      const response = await setLike(data);
+
+      setIsLiked(response.liked);
+    } catch (error) {
+      console.error("Error al dar like:", error);
     }
-
-    setIsSaved(!isSaved);
-    toast({
-      title: isSaved ? "Removido de guardados" : "Guardado",
-      description: isSaved
-        ? "La receta fue removida de tus guardados"
-        : "La receta fue guardada para más tarde",
-    });
   };
+
+  // const handleSave = () => {
+  //   if (!isAuthenticated) {
+  //     toast({
+  //       title: "Inicia sesión",
+  //       description: "Necesitas iniciar sesión para guardar recetas",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
+
+  //   setIsSaved(!isSaved);
+  //   toast({
+  //     title: isSaved ? "Removido de guardados" : "Guardado",
+  //     description: isSaved
+  //       ? "La receta fue removida de tus guardados"
+  //       : "La receta fue guardada para más tarde",
+  //   });
+  // };
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -184,13 +198,17 @@ export default function RecipeDetailPage() {
                   variant={isLiked ? "default" : "secondary"}
                   size="sm"
                   onClick={handleLike}
+                  disabled={!isAuthenticated}
                   className="backdrop-blur-sm bg-background/80"
                 >
                   <Heart
-                    className={`w-4 h-4 ${isLiked ? "fill-current" : ""}`}
+                    className={`w-4 h-4 ${
+                      isAuthenticated && isLiked ? "fill-current" : ""
+                    }`}
                   />
                 </Button>
-                <Button
+
+                {/* <Button
                   variant={isSaved ? "default" : "secondary"}
                   size="sm"
                   onClick={handleSave}
@@ -199,7 +217,8 @@ export default function RecipeDetailPage() {
                   <Bookmark
                     className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`}
                   />
-                </Button>
+                </Button> */}
+
                 <Button
                   variant="secondary"
                   size="sm"

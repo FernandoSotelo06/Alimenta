@@ -30,6 +30,7 @@ interface ApiReceta {
   dificultad: "fácil" | "intermedio" | "difícil"
   calificacion_promedio: number
   etiquetas: ApiEtiqueta[]
+  likes: number
   usuario: {
     nombre: string
     avatar: string
@@ -134,7 +135,7 @@ export default function RecipesPage() {
     prepTime: 0,
     cookTime: recipe.tiempo_preparacion,
     servings: recipe.porciones,
-    likes: Math.round(recipe.calificacion_promedio * 10),
+    likes: recipe.likes,
     tags: recipe.etiquetas.map(e => e.nombre)
   })
 

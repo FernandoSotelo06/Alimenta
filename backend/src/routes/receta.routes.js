@@ -3,6 +3,7 @@ import models from "../models/index.js";
 import { Op } from "sequelize";
 import { createRecipe, findRecipeById } from "../controllers/recipesControllers.js";
 import multer from "multer";
+import {sequelize} from '../config/db.js'
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -59,8 +60,16 @@ router.get("/", async (req, res) => {
     const recetas = await models.Receta.findAll({
       where: whereClause,
       include: includeClause,
-      order: orderClause, // <-- ¡AQUÍ!
-      limit: 50, // Traemos más recetas en esta página
+      order: orderClause,
+      limit: 50,
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(SELECT COUNT(*) FROM likes WHERE likes.receta_id = "Receta".receta_id)`),
+            "likes"
+          ]
+        ]
+      },
     });
 
     res.json(recetas);
