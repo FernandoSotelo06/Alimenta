@@ -178,7 +178,7 @@ export default function RecipesPage() {
 
               {isAuthenticated && (
                 <Button asChild>
-                  <Link href="/recetas/nueva">
+                  <Link href="/crear-receta">
                     <Plus className="w-4 h-4 mr-2" />
                     Nueva Receta
                   </Link>

@@ -82,11 +82,21 @@ export const createRecipe = async (req, res) => {
           ing.ingrediente_id
         );
         if (ingrediente) {
-          totals.calorias += Number(ingrediente.calorias) || 0;
-          totals.proteinas += Number(ingrediente.proteinas) || 0;
-          totals.carbohidratos += Number(ingrediente.carbohidratos) || 0;
-          totals.grasas += Number(ingrediente.grasas) || 0;
-          totals.fibra += Number(ingrediente.fibra) || 0;
+          totals.calorias +=
+            (Number(ingrediente.calorias) * ing.cantidad) /
+              ingrediente.cantidad_base || 0;
+          totals.proteinas +=
+            (Number(ingrediente.proteinas) * ing.cantidad) /
+              ingrediente.cantidad_base || 0;
+          totals.carbohidratos +=
+            (Number(ingrediente.carbohidratos) * ing.cantidad) /
+              ingrediente.cantidad_base || 0;
+          totals.grasas +=
+            (Number(ingrediente.grasas) * ing.cantidad) /
+              ingrediente.cantidad_base || 0;
+          totals.fibra +=
+            (Number(ingrediente.fibra) * ing.cantidad) /
+              ingrediente.cantidad_base || 0;
         }
       }
 
@@ -123,6 +133,7 @@ export const createRecipe = async (req, res) => {
       recipe: newRecipe,
     });
   } catch (error) {
+    console.error(error)
     res.status(500).json({
       message: "Error al crear la receta",
       error: error.message,
@@ -164,11 +175,11 @@ export const findRecipeById = async (req, res) => {
         {
           model: models.Like,
           as: "likes",
-          attributes: ["usuario_id"]
-        }
+          attributes: ["usuario_id"],
+        },
       ],
     });
-    
+
     if (!recipe) {
       return res.status(404).json({ message: "Receta no encontrada" });
     }
@@ -194,13 +205,13 @@ export const getMisRecetas = async (req, res) => {
 
     // Construir condiciones de búsqueda
     const whereConditions = {
-      usuario_id: usuarioId
+      usuario_id: usuarioId,
     };
 
     // Filtrar por estado si se especifica
-    if (estado === 'publicadas') {
+    if (estado === "publicadas") {
       whereConditions.activa = true;
-    } else if (estado === 'borradores') {
+    } else if (estado === "borradores") {
       whereConditions.activa = false;
     }
 
@@ -208,31 +219,33 @@ export const getMisRecetas = async (req, res) => {
     const recetas = await models.Receta.findAll({
       where: whereConditions,
       attributes: [
-        'receta_id',
-        'titulo',
-        'descripcion',
-        'imagen_principal',
-        'fecha_creacion',
-        'activa',
-        'tiempo_preparacion',
-        'porciones',
-        'dificultad'
+        "receta_id",
+        "titulo",
+        "descripcion",
+        "imagen_principal",
+        "fecha_creacion",
+        "activa",
+        "tiempo_preparacion",
+        "porciones",
+        "dificultad",
       ],
-      include: [{
-        model: models.Like,
-        as: 'likes',
-        attributes: []
-      }],
-      order: [['fecha_creacion', 'DESC']],
-      group: ['Receta.receta_id'],
-      subQuery: false
+      include: [
+        {
+          model: models.Like,
+          as: "likes",
+          attributes: [],
+        },
+      ],
+      order: [["fecha_creacion", "DESC"]],
+      group: ["Receta.receta_id"],
+      subQuery: false,
     });
 
     // Para cada receta, contar sus likes y vistas (simuladas por ahora)
     const recetasConEstadisticas = await Promise.all(
       recetas.map(async (receta) => {
         const likesCount = await models.Like.count({
-          where: { receta_id: receta.receta_id }
+          where: { receta_id: receta.receta_id },
         });
 
         return {
@@ -241,26 +254,25 @@ export const getMisRecetas = async (req, res) => {
           descripcion: receta.descripcion,
           imagen: receta.imagen_principal,
           fecha: receta.fecha_creacion,
-          estado: receta.activa ? 'publicada' : 'borrador',
+          estado: receta.activa ? "publicada" : "borrador",
           likes: likesCount,
           vistas: 0, // TODO: Implementar sistema de vistas
           tiempoPreparacion: receta.tiempo_preparacion,
           porciones: receta.porciones,
-          dificultad: receta.dificultad
+          dificultad: receta.dificultad,
         };
       })
     );
 
     res.status(200).json({
       success: true,
-      data: recetasConEstadisticas
+      data: recetasConEstadisticas,
     });
-
   } catch (error) {
-    console.error('Error en getMisRecetas:', error);
+    console.error("Error en getMisRecetas:", error);
     res.status(500).json({
       success: false,
-      error: 'Error al obtener tus recetas'
+      error: "Error al obtener tus recetas",
     });
   }
 };
@@ -273,10 +285,10 @@ export const cambiarEstadoReceta = async (req, res) => {
     const { activa } = req.body;
 
     // Validar que el campo activa sea booleano
-    if (typeof activa !== 'boolean') {
+    if (typeof activa !== "boolean") {
       return res.status(400).json({
         success: false,
-        error: 'El campo "activa" debe ser true o false'
+        error: 'El campo "activa" debe ser true o false',
       });
     }
 
@@ -286,7 +298,7 @@ export const cambiarEstadoReceta = async (req, res) => {
     if (!receta) {
       return res.status(404).json({
         success: false,
-        error: 'Receta no encontrada'
+        error: "Receta no encontrada",
       });
     }
 
@@ -294,7 +306,7 @@ export const cambiarEstadoReceta = async (req, res) => {
     if (receta.usuario_id !== usuarioId) {
       return res.status(403).json({
         success: false,
-        error: 'No tienes permiso para modificar esta receta'
+        error: "No tienes permiso para modificar esta receta",
       });
     }
 
@@ -303,18 +315,17 @@ export const cambiarEstadoReceta = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: activa ? 'Receta publicada' : 'Receta marcada como borrador',
+      message: activa ? "Receta publicada" : "Receta marcada como borrador",
       data: {
         id: receta.receta_id,
-        activa: receta.activa
-      }
+        activa: receta.activa,
+      },
     });
-
   } catch (error) {
-    console.error('Error en cambiarEstadoReceta:', error);
+    console.error("Error en cambiarEstadoReceta:", error);
     res.status(500).json({
       success: false,
-      error: 'Error al cambiar el estado de la receta'
+      error: "Error al cambiar el estado de la receta",
     });
   }
 };
@@ -331,7 +342,7 @@ export const eliminarReceta = async (req, res) => {
     if (!receta) {
       return res.status(404).json({
         success: false,
-        error: 'Receta no encontrada'
+        error: "Receta no encontrada",
       });
     }
 
@@ -339,7 +350,7 @@ export const eliminarReceta = async (req, res) => {
     if (receta.usuario_id !== usuarioId) {
       return res.status(403).json({
         success: false,
-        error: 'No tienes permiso para eliminar esta receta'
+        error: "No tienes permiso para eliminar esta receta",
       });
     }
 
@@ -348,14 +359,13 @@ export const eliminarReceta = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Receta eliminada exitosamente'
+      message: "Receta eliminada exitosamente",
     });
-
   } catch (error) {
-    console.error('Error en eliminarReceta:', error);
+    console.error("Error en eliminarReceta:", error);
     res.status(500).json({
       success: false,
-      error: 'Error al eliminar la receta'
+      error: "Error al eliminar la receta",
     });
   }
 };
