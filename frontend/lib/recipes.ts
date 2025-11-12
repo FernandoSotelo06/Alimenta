@@ -207,7 +207,7 @@ export class RecipeService {
 // Servicios Reales para "Mis Recetas"
 // ==========================================
 
-const API_URL = 'http://localhost:4000/api/recetas';
+const API_URL = 'https://alimenta-backend.onrender.com/api/recetas';
 
 export interface MiReceta {
   id: number;

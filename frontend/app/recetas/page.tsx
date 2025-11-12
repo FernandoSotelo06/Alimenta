@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 
-const API_URL = "http://localhost:4000/api"
+const API_URL = "https://alimenta-backend.onrender.com/api"
 
 interface ApiEtiqueta {
   etiqueta_id: number

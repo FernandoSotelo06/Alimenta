@@ -1,5 +1,5 @@
 // Servicio para obtener logros del usuario
-const API_URL = 'http://localhost:4000/api/usuarios';
+const API_URL = 'https://alimenta-backend.onrender.com/api/usuarios';
 
 export interface Logro {
   id: string

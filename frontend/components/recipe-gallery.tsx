@@ -11,7 +11,7 @@ import { Search, Filter, TrendingUp } from "lucide-react"
 import Link from "next/link"
 
 // URL de tu API de backend
-const API_URL = "http://localhost:4000/api";
+const API_URL = "https://alimenta-backend.onrender.com/api";
 
 // --- Definición de Tipos (Interfaces) ---
 

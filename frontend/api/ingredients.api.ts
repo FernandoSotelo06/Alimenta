@@ -1,7 +1,7 @@
 import axios from "axios"
 import Ingredient from "@/typings/ingredient"
 
-const API_URL = "http://localhost:4000/api"
+const API_URL = "https://alimenta-backend.onrender.com/api"
 
 export const getAllIngredients = async (): Promise<Ingredient[]> => {
   try {

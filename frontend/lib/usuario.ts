@@ -1,5 +1,5 @@
 // Service para las APIs de usuarios
-const API_URL = 'http://localhost:4000/api/usuarios';
+const API_URL = 'https://alimenta-backend.onrender.com/api/usuarios';
 
 export interface EstadisticasUsuario {
   recetas: number;

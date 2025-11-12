@@ -1,5 +1,5 @@
 // Authentication system with backend API integration
-const API_URL = 'http://localhost:4000/api/auth';
+const API_URL = 'https://alimenta-backend.onrender.com/api/auth';
 
 export interface User {
   id: number
