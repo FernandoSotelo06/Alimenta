@@ -10,7 +10,7 @@ import RecetaEtiquetaModel from "./RecetaEtiqueta.js";
 import ComentarioModel from "./Comentario.js";
 import FavoritoModel from "./Favorito.js";
 import LikeModel from "./Like.js";
-import setupAssociations from "./associations.js";
+import setupAssociations from "./Associations.js";
 
 const models = {
   Categoria: CategoriaModel(sequelize),
