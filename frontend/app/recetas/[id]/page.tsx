@@ -44,8 +44,6 @@ export default function RecipeDetailPage() {
   const [checkedInstructions, setCheckedInstructions] = useState<boolean[]>([]);
 
   useEffect(() => {
-    if (!currentUser) return;
-
     const loadRecipe = async () => {
       try {
         const data = await getRecipeById(Number(params.id));
