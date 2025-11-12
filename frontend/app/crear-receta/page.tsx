@@ -51,7 +51,7 @@ export default function CreateRecipePage() {
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
   const [ingredientError, setIngredientError] = useState("");
   const [instructionError, setInstructionError] = useState("");
-  
+
   // Estados de carga y error
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
@@ -248,26 +248,30 @@ export default function CreateRecipePage() {
       router.push("/recetas");
     } catch (error: any) {
       console.error("Error al crear receta:", error);
-      
+
       // Manejar diferentes tipos de errores
-      let errorMessage = "No se pudo crear la receta. Por favor, intenta nuevamente.";
-      
+      let errorMessage =
+        "No se pudo crear la receta. Por favor, intenta nuevamente.";
+
       if (error.response) {
         // Error del servidor con respuesta
         if (error.response.status === 400) {
-          errorMessage = "Hay errores en los datos enviados. Verifica el formulario.";
+          errorMessage =
+            "Hay errores en los datos enviados. Verifica el formulario.";
         } else if (error.response.status === 401) {
-          errorMessage = "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.";
+          errorMessage =
+            "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.";
         } else if (error.response.status === 500) {
           errorMessage = "Error en el servidor. Intenta más tarde.";
         }
       } else if (error.request) {
         // No se recibió respuesta
-        errorMessage = "No se pudo conectar con el servidor. Verifica tu conexión.";
+        errorMessage =
+          "No se pudo conectar con el servidor. Verifica tu conexión.";
       }
 
       setSubmitError(errorMessage);
-      
+
       toast({
         title: "Error",
         description: errorMessage,
@@ -305,14 +309,6 @@ export default function CreateRecipePage() {
               Comparte tu receta saludable con la comunidad
             </p>
           </div>
-
-          {/* Error general */}
-          {submitError && (
-            <Alert variant="destructive" className="mb-6">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{submitError}</AlertDescription>
-            </Alert>
-          )}
 
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* INFORMACIÓN BÁSICA */}
@@ -407,7 +403,10 @@ export default function CreateRecipePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="prepTime" className="flex items-center gap-2">
+                    <Label
+                      htmlFor="prepTime"
+                      className="flex items-center gap-2"
+                    >
                       <Clock className="w-4 h-4" /> Tiempo (min) *
                     </Label>
                     <Input
@@ -423,7 +422,10 @@ export default function CreateRecipePage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="servings" className="flex items-center gap-2">
+                    <Label
+                      htmlFor="servings"
+                      className="flex items-center gap-2"
+                    >
                       <Users className="w-4 h-4" /> Porciones *
                     </Label>
                     <Input
@@ -554,7 +556,9 @@ export default function CreateRecipePage() {
                       {index + 1}
                     </div>
                     <Textarea
-                      placeholder={`Paso ${index + 1}: Describe claramente qué hacer...`}
+                      placeholder={`Paso ${
+                        index + 1
+                      }: Describe claramente qué hacer...`}
                       value={instruction}
                       onChange={(e) => updateInstruction(index, e.target.value)}
                       rows={3}
@@ -613,7 +617,11 @@ export default function CreateRecipePage() {
                     }
                     disabled={isSubmitting}
                   />
-                  <Button type="button" onClick={addTag} disabled={isSubmitting}>
+                  <Button
+                    type="button"
+                    onClick={addTag}
+                    disabled={isSubmitting}
+                  >
                     <Plus className="w-4 h-4" />
                   </Button>
                 </div>
@@ -634,6 +642,14 @@ export default function CreateRecipePage() {
               </CardContent>
             </Card>
 
+            {/* Error general */}
+            {submitError && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{submitError}</AlertDescription>
+              </Alert>
+            )}
+
             {/* BOTONES DE ACCIÓN */}
             <div className="flex flex-col sm:flex-row justify-end gap-4">
               <Button
@@ -644,8 +660,8 @@ export default function CreateRecipePage() {
               >
                 Cancelar
               </Button>
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="min-w-[140px]"
                 disabled={isSubmitting}
               >

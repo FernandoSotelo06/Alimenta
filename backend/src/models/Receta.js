@@ -38,9 +38,9 @@ export default (sequelize) => {
       },
       dificultad: {
         type: DataTypes.STRING(20),
-        defaultValue: "fácil",
+        defaultValue: "facil",
         validate: {
-          isIn: [["fácil", "intermedio", "difícil"]],
+          isIn: [["facil", "intermedio", "dificil"]],
         },
       },
       imagen_principal: {
