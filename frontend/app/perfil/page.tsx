@@ -2,36 +2,123 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { CalendarDays, Mail, Edit3, Save, X } from "lucide-react"
+import { CalendarDays, Mail, Edit3, Save, X, Heart } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth"
+import { UsuarioService, type PerfilUsuario } from "@/lib/usuario"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ProfilePage() {
   const { user, isAuthenticated, loading } = useAuth()
   const router = useRouter()
+  const { toast } = useToast()
+  
+  const [perfil, setPerfil] = useState<PerfilUsuario | null>(null)
+  const [loadingPerfil, setLoadingPerfil] = useState(true)
+  
   const [isEditing, setIsEditing] = useState(false)
   const [editedName, setEditedName] = useState("")
-  const [editedBio, setEditedBio] = useState("")
+  const [editedAvatar, setEditedAvatar] = useState("")
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       router.push("/login")
       return
     }
-    if (user) {
-      setEditedName(user.name)
-      setEditedBio(user.bio || "")
-    }
-  }, [isAuthenticated, user, router, loading])
+  }, [isAuthenticated, loading, router])
 
-  if (loading) {
+  // Cargar perfil del usuario
+  useEffect(() => {
+    const cargarPerfil = async () => {
+      if (isAuthenticated && user) {
+        setLoadingPerfil(true)
+        const result = await UsuarioService.getMiPerfil()
+        if (result.success && result.data) {
+          setPerfil(result.data)
+          setEditedName(result.data.usuario.nombre)
+          setEditedAvatar(result.data.usuario.avatar || "")
+        } else {
+          toast({
+            title: "Error",
+            description: result.error || "No se pudo cargar el perfil",
+            variant: "destructive"
+          })
+        }
+        setLoadingPerfil(false)
+      }
+    }
+
+    cargarPerfil()
+  }, [isAuthenticated, user, toast])
+
+  const handleSave = async () => {
+    if (!editedName.trim()) {
+      toast({
+        title: "Error",
+        description: "El nombre no puede estar vacío",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setSaving(true)
+    const result = await UsuarioService.actualizarMiPerfil({
+      nombre: editedName.trim(),
+      avatar: editedAvatar.trim() || null
+    })
+
+    if (result.success && result.data) {
+      // Actualizar estado del perfil
+      setPerfil(prev => prev ? {
+        ...prev,
+        usuario: result.data.usuario
+      } : null)
+      
+      // ACTUALIZAR LOCALSTORAGE para sincronizar con useAuth
+      const userActualizado = {
+        id: result.data.usuario.id.toString(),
+        name: result.data.usuario.nombre,
+        email: result.data.usuario.email,
+        avatar: result.data.usuario.avatar,
+        joinedDate: result.data.usuario.fechaRegistro
+      }
+      localStorage.setItem("alimenta_user", JSON.stringify(userActualizado))
+      
+      // Disparar eventos para que useAuth se actualice
+      window.dispatchEvent(new CustomEvent("authChange", { detail: { user: userActualizado } }))
+      
+      setIsEditing(false)
+      toast({
+        title: "Perfil actualizado",
+        description: "Tus cambios se guardaron correctamente"
+      })
+    } else {
+      toast({
+        title: "Error",
+        description: result.error || "No se pudo actualizar el perfil",
+        variant: "destructive"
+      })
+    }
+    setSaving(false)
+  }
+
+  const handleCancel = () => {
+    if (perfil) {
+      setEditedName(perfil.usuario.nombre)
+      setEditedAvatar(perfil.usuario.avatar || "")
+    }
+    setIsEditing(false)
+  }
+
+  if (loading || loadingPerfil) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5 flex items-center justify-center">
         <div className="text-center">
@@ -42,20 +129,8 @@ export default function ProfilePage() {
     )
   }
 
-  if (!user) {
+  if (!user || !perfil) {
     return null
-  }
-
-  const handleSave = () => {
-    // In a real app, this would update the user data
-    console.log("Saving profile:", { name: editedName, bio: editedBio })
-    setIsEditing(false)
-  }
-
-  const handleCancel = () => {
-    setEditedName(user.name)
-    setEditedBio(user.bio || "")
-    setIsEditing(false)
   }
 
   return (
@@ -69,32 +144,52 @@ export default function ProfilePage() {
                 <CardHeader className="text-center">
                   <div className="flex justify-center mb-4">
                     <Avatar className="w-24 h-24">
-                      <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
-                      <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
+                      <AvatarImage 
+                        src={isEditing ? editedAvatar : perfil.usuario.avatar || "/placeholder.svg"} 
+                        alt={perfil.usuario.nombre} 
+                      />
+                      <AvatarFallback className="text-2xl">
+                        {perfil.usuario.nombre.charAt(0).toUpperCase()}
+                      </AvatarFallback>
                     </Avatar>
                   </div>
                   {isEditing ? (
-                    <div className="space-y-2">
-                      <Input
-                        value={editedName}
-                        onChange={(e) => setEditedName(e.target.value)}
-                        className="text-center"
-                      />
+                    <div className="space-y-3">
+                      <div>
+                        <Label className="text-xs text-left block mb-1">Nombre</Label>
+                        <Input
+                          value={editedName}
+                          onChange={(e) => setEditedName(e.target.value)}
+                          placeholder="Tu nombre"
+                          className="text-center"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-xs text-left block mb-1">URL del Avatar</Label>
+                        <Input
+                          value={editedAvatar}
+                          onChange={(e) => setEditedAvatar(e.target.value)}
+                          placeholder="https://..."
+                          className="text-sm"
+                        />
+                      </div>
                     </div>
                   ) : (
-                    <CardTitle className="text-xl">{user.name}</CardTitle>
+                    <>
+                      <CardTitle className="text-xl">{perfil.usuario.nombre}</CardTitle>
+                      <div className="flex items-center justify-center gap-2 text-muted-foreground mt-2">
+                        <Mail className="w-4 h-4" />
+                        <span className="text-sm">{perfil.usuario.email}</span>
+                      </div>
+                    </>
                   )}
-                  <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                    <Mail className="w-4 h-4" />
-                    <span className="text-sm">{user.email}</span>
-                  </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <CalendarDays className="w-4 h-4" />
                     <span>
                       Miembro desde{" "}
-                      {new Date(user.joinedDate).toLocaleDateString("es-ES", {
+                      {new Date(perfil.usuario.fechaRegistro).toLocaleDateString("es-ES", {
                         year: "numeric",
                         month: "long",
                       })}
@@ -103,35 +198,36 @@ export default function ProfilePage() {
 
                   <Separator />
 
-                  <div>
-                    <Label className="text-sm font-medium">Biografía</Label>
-                    {isEditing ? (
-                      <Textarea
-                        value={editedBio}
-                        onChange={(e) => setEditedBio(e.target.value)}
-                        placeholder="Cuéntanos sobre ti..."
-                        className="mt-2"
-                        rows={3}
-                      />
-                    ) : (
-                      <p className="text-sm text-muted-foreground mt-2">{user.bio || "No hay biografía disponible."}</p>
-                    )}
-                  </div>
-
                   <div className="flex gap-2">
                     {isEditing ? (
                       <>
-                        <Button onClick={handleSave} size="sm" className="flex-1">
+                        <Button 
+                          onClick={handleSave} 
+                          size="sm" 
+                          className="flex-1"
+                          disabled={saving}
+                        >
                           <Save className="w-4 h-4 mr-2" />
-                          Guardar
+                          {saving ? "Guardando..." : "Guardar"}
                         </Button>
-                        <Button onClick={handleCancel} variant="outline" size="sm" className="flex-1 bg-transparent">
+                        <Button 
+                          onClick={handleCancel} 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex-1"
+                          disabled={saving}
+                        >
                           <X className="w-4 h-4 mr-2" />
                           Cancelar
                         </Button>
                       </>
                     ) : (
-                      <Button onClick={() => setIsEditing(true)} variant="outline" size="sm" className="w-full">
+                      <Button 
+                        onClick={() => setIsEditing(true)} 
+                        variant="outline" 
+                        size="sm" 
+                        className="w-full"
+                      >
                         <Edit3 className="w-4 h-4 mr-2" />
                         Editar Perfil
                       </Button>
@@ -149,22 +245,14 @@ export default function ProfilePage() {
                   <CardDescription>Tu actividad en Alimenta</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">12</div>
-                      <div className="text-sm text-muted-foreground">Recetas</div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center p-4 bg-primary/5 rounded-lg">
+                      <div className="text-3xl font-bold text-primary">{perfil.estadisticas.recetas}</div>
+                      <div className="text-sm text-muted-foreground mt-1">Recetas</div>
                     </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">48</div>
-                      <div className="text-sm text-muted-foreground">Me gusta</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">156</div>
-                      <div className="text-sm text-muted-foreground">Seguidores</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-primary">89</div>
-                      <div className="text-sm text-muted-foreground">Siguiendo</div>
+                    <div className="text-center p-4 bg-red-500/5 rounded-lg">
+                      <div className="text-3xl font-bold text-red-500">{perfil.estadisticas.meGusta}</div>
+                      <div className="text-sm text-muted-foreground mt-1">Me gusta</div>
                     </div>
                   </div>
                 </CardContent>
@@ -176,23 +264,40 @@ export default function ProfilePage() {
                   <CardDescription>Tus últimas creaciones culinarias</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { name: "Quinoa con Verduras al Vapor", date: "2024-03-15", likes: 23 },
-                      { name: "Smoothie Verde Energizante", date: "2024-03-12", likes: 18 },
-                      { name: "Ensalada de Lentejas y Aguacate", date: "2024-03-10", likes: 31 },
-                    ].map((recipe, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <h4 className="font-medium">{recipe.name}</h4>
-                          <p className="text-sm text-muted-foreground">
-                            {new Date(recipe.date).toLocaleDateString("es-ES")}
-                          </p>
-                        </div>
-                        <Badge variant="secondary">{recipe.likes} ❤️</Badge>
-                      </div>
-                    ))}
-                  </div>
+                  {perfil.recetasRecientes.length > 0 ? (
+                    <div className="space-y-3">
+                      {perfil.recetasRecientes.map((receta) => (
+                        <Link 
+                          key={receta.id} 
+                          href={`/recetas/${receta.id}`}
+                          className="block"
+                        >
+                          <div className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent transition-colors cursor-pointer">
+                            <div className="flex-1">
+                              <h4 className="font-medium">{receta.titulo}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                {new Date(receta.fecha).toLocaleDateString("es-ES", {
+                                  day: "numeric",
+                                  month: "numeric",
+                                  year: "numeric"
+                                })}
+                              </p>
+                            </div>
+                            <Badge variant="secondary" className="ml-2">
+                              {receta.likes} <Heart className="w-3 h-3 ml-1 fill-current" />
+                            </Badge>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>Aún no tienes recetas publicadas</p>
+                      <Button asChild className="mt-4" size="sm">
+                        <Link href="/crear-receta">Crear tu primera receta</Link>
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

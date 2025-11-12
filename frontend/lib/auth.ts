@@ -98,11 +98,7 @@ export class AuthService {
   }
 
   static getCurrentUser(): User | null {
-    if (this.currentUser) {
-      console.log("[AuthService] Returning cached user:", this.currentUser.name)
-      return this.currentUser
-    }
-
+    // SIEMPRE leer desde localStorage para tener datos actualizados
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("alimenta_user")
       if (stored) {
@@ -113,11 +109,13 @@ export class AuthService {
         } catch (error) {
           console.log("[AuthService] Error parsing stored user data:", error)
           localStorage.removeItem("alimenta_user")
+          this.currentUser = null
         }
       }
     }
 
     console.log("[AuthService] No user found in storage")
+    this.currentUser = null
     return null
   }
 

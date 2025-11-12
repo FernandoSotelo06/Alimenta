@@ -1,7 +1,14 @@
 import { Router } from "express";
 import models from "../models/index.js";
 import { Op } from "sequelize";
-import { createRecipe, findRecipeById } from "../controllers/recipesControllers.js";
+import { 
+  createRecipe, 
+  findRecipeById, 
+  getMisRecetas, 
+  cambiarEstadoReceta, 
+  eliminarReceta 
+} from "../controllers/recipesControllers.js";
+import { verifyToken } from "../middleware/authMiddleware.js";
 import multer from "multer";
 import {sequelize} from '../config/db.js'
 
@@ -78,7 +85,14 @@ router.get("/", async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 });
+
+// Rutas protegidas - requieren autenticación (ANTES de la ruta genérica /:id)
+router.get("/me", verifyToken, getMisRecetas);
+router.put("/:id/estado", verifyToken, cambiarEstadoReceta);
+router.delete("/:id", verifyToken, eliminarReceta);
+
+// Rutas públicas
 router.post("/", upload.single("image"), createRecipe);
-router.get("/:id", findRecipeById)
+router.get("/:id", findRecipeById);
 
 export default router;

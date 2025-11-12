@@ -202,3 +202,107 @@ export class RecipeService {
     return [...new Set(mockRecipes.map((recipe) => recipe.category))]
   }
 }
+
+// ==========================================
+// Servicios Reales para "Mis Recetas"
+// ==========================================
+
+const API_URL = 'http://localhost:4000/api/recetas';
+
+export interface MiReceta {
+  id: number;
+  titulo: string;
+  descripcion: string;
+  imagen: string | null;
+  fecha: string;
+  estado: 'publicada' | 'borrador';
+  likes: number;
+  vistas: number;
+  tiempoPreparacion: number;
+  porciones: number;
+  dificultad: string;
+}
+
+export class RecetaService {
+  // Obtener todas las recetas del usuario autenticado
+  static async getMisRecetas(estado?: 'publicadas' | 'borradores'): Promise<{ success: boolean; data?: MiReceta[]; error?: string }> {
+    try {
+      let url = `${API_URL}/me`;
+      if (estado) {
+        url += `?estado=${estado}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include', // Importante: envía cookies
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        console.log('[RecetaService] Recetas obtenidas:', result.data.length);
+        return { success: true, data: result.data };
+      }
+
+      console.log('[RecetaService] Error al obtener recetas:', result.error);
+      return { success: false, error: result.error || 'Error al obtener recetas' };
+    } catch (error) {
+      console.error('[RecetaService] Error:', error);
+      return { success: false, error: 'Error de conexión con el servidor' };
+    }
+  }
+
+  // Cambiar estado de una receta (publicar/ocultar)
+  static async cambiarEstado(recetaId: number, activa: boolean): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await fetch(`${API_URL}/${recetaId}/estado`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ activa }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('[RecetaService] Estado actualizado');
+        return { success: true };
+      }
+
+      return { success: false, error: result.error || 'Error al cambiar estado' };
+    } catch (error) {
+      console.error('[RecetaService] Error:', error);
+      return { success: false, error: 'Error de conexión con el servidor' };
+    }
+  }
+
+  // Eliminar una receta
+  static async eliminarReceta(recetaId: number): Promise<{ success: boolean; error?: string }> {
+    try {
+      const response = await fetch(`${API_URL}/${recetaId}`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('[RecetaService] Receta eliminada');
+        return { success: true };
+      }
+
+      return { success: false, error: result.error || 'Error al eliminar receta' };
+    } catch (error) {
+      console.error('[RecetaService] Error:', error);
+      return { success: false, error: 'Error de conexión con el servidor' };
+    }
+  }
+}

@@ -8,21 +8,7 @@ export function useAuth() {
   const [loading, setLoading] = useState(true)
   const initializeRef = useRef(false)
 
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const currentUser = AuthService.getCurrentUser()
-      setUser(currentUser)
-      setLoading(false)
-    }
-
-    // Listen for storage changes (when user logs in/out from another tab or page)
-    window.addEventListener("storage", handleStorageChange)
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange)
-    }
-  }, [])
-
+  // Inicializar autenticación al cargar
   useEffect(() => {
     if (initializeRef.current) return
     initializeRef.current = true
@@ -56,6 +42,10 @@ export function useAuth() {
 
   const logout = useCallback(async () => {
     console.log("[useAuth] Logout iniciado");
+    
+    // Llamar al servicio de autenticación para limpiar localStorage y cookie
+    await AuthService.logout()
+    
     // Actualizar estado inmediatamente
     setUser(null)
     window.dispatchEvent(new CustomEvent("authChange", { detail: { user: null } }))
@@ -67,9 +57,31 @@ export function useAuth() {
       setUser(customEvent.detail.user)
     }
 
+    const handleStorageChange = () => {
+      // Recargar usuario desde localStorage cuando cambia
+      const currentUser = AuthService.getCurrentUser()
+      setUser(currentUser)
+    }
+
+    // Escuchar eventos personalizados de autenticación
     window.addEventListener("authChange", handleAuthChange)
+    
+    // Escuchar cambios en storage (incluye cambios de la misma pestaña)
+    window.addEventListener("storage", handleStorageChange)
+    
+    // Escuchar cambios de visibilidad de la página (cuando vuelves a la pestaña)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        const currentUser = AuthService.getCurrentUser()
+        setUser(currentUser)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
     return () => {
       window.removeEventListener("authChange", handleAuthChange)
+      window.removeEventListener("storage", handleStorageChange)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [])
 
